@@ -15,6 +15,7 @@ func main() {
 	r.POST("/fundraisers", rest.AddFundraiserHandler)
 	r.GET("/fundraisers/:id", rest.FindOneFundraiserHandler)
 	r.PATCH("/fundraisers/:id", rest.UpdateFundraisersHandler)
+	r.DELETE("/fundraisers/:id", rest.DeleteFundraisersHandler)
 
 	r.Run()
 }

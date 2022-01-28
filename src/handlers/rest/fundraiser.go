@@ -59,3 +59,15 @@ func UpdateFundraisersHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": fundraiser})
 }
+
+func DeleteFundraisersHandler(c *gin.Context) {
+	var fundraiser models.Fundraiser
+	if err := postgresql.DB.Where("id = ?", c.Param("id")).First(&fundraiser).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	postgresql.DB.Delete(&fundraiser)
+
+	c.JSON(http.StatusOK, gin.H{"data": "Fundraiser deleted"})
+}

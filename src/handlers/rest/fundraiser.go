@@ -31,3 +31,13 @@ func AddFundraiserHandler(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"data": fundraiser})
 }
+
+func FindOneFundraiserHandler(c *gin.Context) {
+	var fundraiser models.Fundraiser
+	if err := postgresql.DB.Where("id = ?", c.Param("id")).First(&fundraiser).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": fundraiser})
+}

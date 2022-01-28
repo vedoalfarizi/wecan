@@ -1,10 +1,9 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/vedoalfarizi/wecan/src/Infrastructures/database/postgresql"
+	"github.com/vedoalfarizi/wecan/src/handlers/rest"
 )
 
 func main() {
@@ -12,9 +11,7 @@ func main() {
 
 	postgresql.ConnectDatabase()
 
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"data": "hello world"})
-	})
+	r.GET("/fundraisers", rest.GetFundraisersHandler)
 
 	r.Run()
 }

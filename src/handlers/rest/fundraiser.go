@@ -41,3 +41,21 @@ func FindOneFundraiserHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": fundraiser})
 }
+
+func UpdateFundraisersHandler(c *gin.Context) {
+	var fundraiser models.Fundraiser
+	if err := postgresql.DB.Where("id = ?", c.Param("id")).First(&fundraiser).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var payload models.UpdateFundraiserPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	postgresql.DB.Model(&fundraiser).Updates(payload)
+
+	c.JSON(http.StatusOK, gin.H{"data": fundraiser})
+}

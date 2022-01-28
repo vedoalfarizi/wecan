@@ -12,6 +12,7 @@ func main() {
 	postgresql.ConnectDatabase()
 
 	r.GET("/fundraisers", rest.GetFundraisersHandler)
+	r.POST("/fundraisers", rest.AddFundraiserHandler)
 
 	r.Run()
 }

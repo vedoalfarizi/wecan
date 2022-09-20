@@ -17,5 +17,9 @@ func main() {
 	r.PATCH("/fundraisers/:id", rest.UpdateFundraisersHandler)
 	r.DELETE("/fundraisers/:id", rest.DeleteFundraisersHandler)
 
+	r.POST("/fundraisers/:id/disburse", rest.AddDisbursement)
+
+	r.GET("/fundraisers/:id/sheets", rest.GetFundraiserSheetHandler)
+
 	r.Run()
 }

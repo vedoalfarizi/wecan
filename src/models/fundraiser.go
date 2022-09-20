@@ -19,3 +19,7 @@ type UpdateFundraiserPayload struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
+
+type UpdateFundraiserSheetPayload struct {
+	SheetID string `json:"sheet_id"`
+}

@@ -9,10 +9,10 @@ import (
 
 type GSheet interface {
 	GetSpreadsheet(ID string) (resp *sheets.Spreadsheet, err error)
-	CreateSpreadsheet(sheet *sheets.Spreadsheet) (sheetID string, err error)
-	UpdateSpreadsheet(ID string, values *sheets.ValueRange) (err error)
-	AppendValue(ID string, values *sheets.ValueRange) (err error)
-	BatchUpdateSpreadsheet(ID string, req *sheets.BatchUpdateSpreadsheetRequest) (err error)
+	CreateSpreadsheet(ctx context.Context, sheet *sheets.Spreadsheet) (sheetID string, err error)
+	UpdateSpreadsheet(ctx context.Context, ID string, values *sheets.ValueRange) (err error)
+	AppendValue(ctx context.Context, ID string, values *sheets.ValueRange) (err error)
+	BatchUpdateSpreadsheet(ctx context.Context, ID string, req *sheets.BatchUpdateSpreadsheetRequest) (err error)
 }
 
 type gSheet struct {
@@ -41,8 +41,8 @@ func (g *gSheet) GetSpreadsheet(ID string) (resp *sheets.Spreadsheet, err error)
 	return
 }
 
-func (g *gSheet) CreateSpreadsheet(sheet *sheets.Spreadsheet) (sheetID string, err error) {
-	resp, err := g.Spreadsheets.Create(sheet).Do()
+func (g *gSheet) CreateSpreadsheet(ctx context.Context, sheet *sheets.Spreadsheet) (sheetID string, err error) {
+	resp, err := g.Spreadsheets.Create(sheet).Context(ctx).Do()
 	if err != nil {
 		return
 	}
@@ -53,8 +53,8 @@ func (g *gSheet) CreateSpreadsheet(sheet *sheets.Spreadsheet) (sheetID string, e
 	return
 }
 
-func (g *gSheet) UpdateSpreadsheet(ID string, values *sheets.ValueRange) (err error) {
-	_, err = g.Spreadsheets.Values.Update(ID, values.Range, values).ValueInputOption("USER_ENTERED").Do()
+func (g *gSheet) UpdateSpreadsheet(ctx context.Context, ID string, values *sheets.ValueRange) (err error) {
+	_, err = g.Spreadsheets.Values.Update(ID, values.Range, values).ValueInputOption("USER_ENTERED").Context(ctx).Do()
 	if err != nil {
 		return
 	}
@@ -64,8 +64,8 @@ func (g *gSheet) UpdateSpreadsheet(ID string, values *sheets.ValueRange) (err er
 	return
 }
 
-func (g *gSheet) AppendValue(ID string, values *sheets.ValueRange) (err error) {
-	_, err = g.Spreadsheets.Values.Append(ID, values.Range, values).ValueInputOption("USER_ENTERED").Do()
+func (g *gSheet) AppendValue(ctx context.Context, ID string, values *sheets.ValueRange) (err error) {
+	_, err = g.Spreadsheets.Values.Append(ID, values.Range, values).ValueInputOption("USER_ENTERED").Context(ctx).Do()
 	if err != nil {
 		return
 	}
@@ -75,8 +75,8 @@ func (g *gSheet) AppendValue(ID string, values *sheets.ValueRange) (err error) {
 	return
 }
 
-func (g *gSheet) BatchUpdateSpreadsheet(ID string, req *sheets.BatchUpdateSpreadsheetRequest) (err error) {
-	_, err = g.Spreadsheets.BatchUpdate(ID, req).Do()
+func (g *gSheet) BatchUpdateSpreadsheet(ctx context.Context, ID string, req *sheets.BatchUpdateSpreadsheetRequest) (err error) {
+	_, err = g.Spreadsheets.BatchUpdate(ID, req).Context(ctx).Do()
 	if err != nil {
 		return
 	}

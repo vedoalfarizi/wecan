@@ -8,7 +8,7 @@ import (
 )
 
 type GDrive interface {
-	AddPermission(fileID string, permission *drive.Permission) (err error)
+	AddPermission(ctx context.Context, fileID string, permission *drive.Permission) (err error)
 }
 
 type gDrive struct {
@@ -26,13 +26,13 @@ func NewGDrive(ctx context.Context) GDrive {
 	}
 }
 
-func (d *gDrive) AddPermission(fileID string, permission *drive.Permission) (err error) {
-	resp, err := d.Permissions.Create(fileID, permission).Do()
+func (d *gDrive) AddPermission(ctx context.Context, fileID string, permission *drive.Permission) (err error) {
+	_, err = d.Permissions.Create(fileID, permission).Context(ctx).Do()
 	if err != nil {
 		return
 	}
 
-	log.Printf("Success AddPermission %+v", resp)
+	log.Println("Success AddPermission")
 
 	return
 }

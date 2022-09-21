@@ -7,21 +7,20 @@ import (
 	"github.com/vedoalfarizi/wecan/src/Infrastructures/database/postgresql"
 	"github.com/vedoalfarizi/wecan/src/Infrastructures/google"
 	"github.com/vedoalfarizi/wecan/src/models"
+	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/sheets/v4"
 	"net/http"
 	"time"
 )
 
-func createSpreadSheet(ctx context.Context, title string, fundraiserID uint) (sheetID string, err error) {
-	gSheet := google.NewGSheet(ctx)
-
+func createSpreadSheet(ctx context.Context, sheet google.GSheet, title string) (sheetID string, err error) {
 	sheetProps := &sheets.Spreadsheet{
 		Properties: &sheets.SpreadsheetProperties{
-			Title: fmt.Sprintf("%d - %s", fundraiserID, title),
+			Title: fmt.Sprintf("Rekap Pencairan Dana %s", title),
 		},
 	}
 
-	sheetID, err = gSheet.CreateSpreadsheet(sheetProps)
+	sheetID, err = sheet.CreateSpreadsheet(ctx, sheetProps)
 	if err != nil {
 		return
 	}
@@ -31,7 +30,7 @@ func createSpreadSheet(ctx context.Context, title string, fundraiserID uint) (sh
 		Range:          "Sheet1!A1:F1",
 		Values: [][]interface{}{
 			{
-				"Code",
+				"ID",
 				"Tanggal",
 				"Tujuan",
 				"Jumlah",
@@ -42,7 +41,17 @@ func createSpreadSheet(ctx context.Context, title string, fundraiserID uint) (sh
 	}
 
 	// Set header of sheet
-	err = gSheet.UpdateSpreadsheet(sheetID, &headerProps)
+	err = sheet.UpdateSpreadsheet(ctx, sheetID, &headerProps)
+	if err != nil {
+		return
+	}
+
+	gDrive := google.NewGDrive(ctx)
+	sheetPermission := &drive.Permission{
+		Type: "anyone",
+		Role: "reader",
+	}
+	err = gDrive.AddPermission(ctx, sheetID, sheetPermission)
 	if err != nil {
 		return
 	}
@@ -65,11 +74,10 @@ func AddDisbursement(c *gin.Context) {
 		return
 	}
 
-	ctx := context.Background()
-	gSheet := google.NewGSheet(ctx)
+	gSheet := google.NewGSheet(c)
 
 	if fundraiser.SheetID == "" {
-		sheetID, err := createSpreadSheet(ctx, fundraiser.Name, fundraiser.ID)
+		sheetID, err := createSpreadSheet(c, gSheet, fundraiser.Name)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -81,12 +89,7 @@ func AddDisbursement(c *gin.Context) {
 					AddProtectedRange: &sheets.AddProtectedRangeRequest{
 						ProtectedRange: &sheets.ProtectedRange{
 							Range: &sheets.GridRange{
-								SheetId: 0, // default value for first sheet
-							},
-							Editors: &sheets.Editors{
-								Users: []string{
-									"vedoalfarizi@gmail.com",
-								},
+								SheetId: 0, // default value for the first sheet
 							},
 						},
 					},
@@ -94,7 +97,7 @@ func AddDisbursement(c *gin.Context) {
 			},
 		}
 
-		err = gSheet.BatchUpdateSpreadsheet(sheetID, reqProtect)
+		err = gSheet.BatchUpdateSpreadsheet(c, sheetID, reqProtect)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -131,11 +134,11 @@ func AddDisbursement(c *gin.Context) {
 		},
 	}
 
-	err := gSheet.AppendValue(fundraiser.SheetID, &rowValues)
+	err := gSheet.AppendValue(c, fundraiser.SheetID, &rowValues)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{})
+	c.JSON(http.StatusOK, gin.H{"data": "{}"})
 }

@@ -1,12 +1,10 @@
 package rest
 
 import (
-	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/vedoalfarizi/wecan/src/Infrastructures/database/postgresql"
 	"github.com/vedoalfarizi/wecan/src/Infrastructures/google"
 	"github.com/vedoalfarizi/wecan/src/models"
-	"google.golang.org/api/drive/v3"
 	"net/http"
 )
 
@@ -24,21 +22,10 @@ func GetFundraiserSheetHandler(c *gin.Context) {
 		return
 	}
 
-	ctx := context.Background()
-	gSheet := google.NewGSheet(ctx)
+	gSheet := google.NewGSheet(c)
 	s, err := gSheet.GetSpreadsheet(fundraiser.SheetID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	gDrive := google.NewGDrive(ctx)
-	sheetPermission := &drive.Permission{
-		Type: "anyone",
-		Role: "reader",
-	}
-	err = gDrive.AddPermission(s.SpreadsheetId, sheetPermission)
-	if err != nil {
 		return
 	}
 

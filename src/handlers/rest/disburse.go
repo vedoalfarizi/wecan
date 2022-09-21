@@ -47,8 +47,6 @@ func createSpreadSheet(ctx context.Context, title string, fundraiserID uint) (sh
 		return
 	}
 
-	// set access of spreadsheet
-
 	return
 }
 
@@ -139,5 +137,5 @@ func AddDisbursement(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": fundraiser.SheetID})
+	c.JSON(http.StatusOK, gin.H{})
 }
